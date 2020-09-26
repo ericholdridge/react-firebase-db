@@ -1,6 +1,7 @@
-import * as firebase from 'firebase';
+import firebase from "firebase"
+import "firebase/firestore"
 
-var firebaseConfig = {
+const firebaseConfig = {
   apiKey: "AIzaSyArzpzZ8Jp8tcKIfTBUPJbl_cQVCD4utkg",
   authDomain: "react-firebase-db-6d102.firebaseapp.com",
   databaseURL: "https://react-firebase-db-6d102.firebaseio.com",
@@ -8,10 +9,10 @@ var firebaseConfig = {
   storageBucket: "react-firebase-db-6d102.appspot.com",
   messagingSenderId: "836905517842",
   appId: "1:836905517842:web:90351ae0fdcb4731aca9cb",
-  measurementId: "G-2S1BHRQCB7",
+  measurementId: "G-2S1BHRQCB7"
 };
 
 // Initialize Firebase
-const firebaseDb = firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(firebaseConfig);
 
-export default firebaseDb.database()
+export default firebase;

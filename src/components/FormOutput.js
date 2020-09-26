@@ -4,7 +4,7 @@ import { useContext } from "react";
 import { FormContext } from "./FormContext/FormContext";
 
 const FormOutput = () => {
-  const { dbContacts, handleDeleteContact } = useContext(FormContext);
+  const { formValues, handleRemoveUser, handleEditUser } = useContext(FormContext);
   return (
     <div css={styles} className="formOutput">
       <div className="formHeadings">
@@ -14,15 +14,15 @@ const FormOutput = () => {
         <h3>Actions</h3>
       </div>
       <div className="formData">
-        {Object.keys(dbContacts).map((item) => {
+        {formValues.map((item) => {
           return (
-            <div key={dbContacts[item].id}>
-              <span>{dbContacts[item].fullName}</span>
-              <span>{dbContacts[item].email}</span>
-              <span>{dbContacts[item].address}</span>
+            <div key={item.id}>
+              <span>{item.name}</span>
+              <span>{item.email}</span>
+              <span>{item.address}</span>
               <div className="editOrDelete">
-                <span>E</span>
-                <span onClick={() => handleDeleteContact(item)}>
+                <span className="edit" onClick={() => handleEditUser(item)}>E</span>
+                <span className="delete" onClick={() => handleRemoveUser(item)}>
                   D
                 </span>
               </div>
@@ -47,15 +47,29 @@ const styles = css`
     div {
       display: flex;
       justify-content: space-between;
+      align-items: center;
+      margin: 4px 0 0 0;
       span {
         width: 100%;
         text-align: left;
         display: block;
       }
       .editOrDelete {
-        span {
-          padding: 0 10px;
+        display: flex;
+        align-items: center;
+        .edit,
+        .delete {
+          padding: 4px 20px;
+          color: #fff;
+          border-radius: 4px;
           cursor: pointer;
+        }
+        .edit {
+          background: green;
+          margin: 0 4px 0 0;
+        }
+        .delete {
+          background: red;
         }
       }
     }

@@ -1,86 +1,76 @@
 import React, { useState, createContext, useEffect } from "react";
-import firebaseDb from "../../db/firebase";
+import firebase from "../../db/firebase";
 import { v4 as uuidv4 } from "uuid";
 
 export const FormContext = createContext();
 export const FormProvider = ({ children }) => {
-  const [formValues, setFormValues] = useState({
-    fullName: "",
-    address: "",
-    email: "",
-    id: uuidv4(),
-  });
-  const [dbContacts, setDbContacts] = useState({});
+  const ref = firebase.firestore().collection("users");
+  const [name, setName] = useState("");
+  const [address, setAddress] = useState("");
+  const [email, setEmail] = useState("");
+  const [formValues, setFormValues] = useState([]);
 
-  // Update the form values object with the users input
-  const updateFormValues = (e) => {
-    const { name, value } = e.target;
-    setFormValues((prevState) => ({
-      ...prevState,
-      [name]: value,
-      id: uuidv4(),
-    }));
-  };
 
-  // Add the form values object to the firebaseDB
-  const handleFormSubmit = (e) => {
-    e.preventDefault();
-    // Check if the form values are not empty
-    if (
-      formValues.fullName.trim() &&
-      formValues.address.trim() &&
-      formValues.email.trim() !== ""
-    ) {
-      // If form values aren't empty, add the form values to the firebaseDB
-      handleAddingValuesToFirebase(formValues);
-      // Clear the input values after the form submit
-      setFormValues({
-        fullName: "",
-        address: "",
-        email: "",
+  const handleOutputFormValues = () => {
+    ref.onSnapshot((querySnapshot) => {
+      const items = [];
+      querySnapshot.forEach((doc) => {
+        items.push(doc.data());
       });
-    } else {
-      return alert("The form is invalid. Try again");
-    }
-  };
-
-  // Create contacts key in the firebaseDB and push the form values object
-  const handleAddingValuesToFirebase = (obj) => {
-    firebaseDb.ref("contacts").push(obj, (err) => {
-      if (err) {
-        console.log(err);
-      }
+      setFormValues(items);
     });
   };
 
-  // Get the contact values in the firebaseDB and store them in a new state object
   useEffect(() => {
-    firebaseDb.ref("contacts").on("value", (snapshot) => {
-      if (snapshot.val() !== null) {
-        setDbContacts({
-          ...snapshot.val(),
-        });
-      }
-    });
+    handleOutputFormValues();
   }, []);
 
-  // Delete the object that is clicked on by the user
-  const handleDeleteContact = (item) => {
-    firebaseDb.ref(`contacts/${item}`).remove((err) => {
-      if (err) {
-        console.log(err);
-      }
-    });
+  const clearInputValues = () => {
+    setName("");
+    setAddress("");
+    setEmail("");
   };
+
+  const handleAddUser = (newUser, e) => {
+    // Prevent the page from refreshing after the submit button is clicked
+    e.preventDefault();
+    ref
+      .doc(newUser.id)
+      .set(newUser)
+      .catch((error) => {
+        console.log(error);
+      });
+    // Clear the input values after the user submits the form
+    clearInputValues();
+  };
+
+  // Delete a user
+  const handleRemoveUser = (item) => {
+    ref
+      .doc(item.id)
+      .delete()
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const handleEditUser = (item) => {
+    console.log(item)
+  }
 
   return (
     <FormContext.Provider
       value={{
+        name,
+        setName,
+        address,
+        setAddress,
+        email,
+        setEmail,
         formValues,
-        updateFormValues,
-        handleFormSubmit,
-        dbContacts,
-        handleDeleteContact,
+        handleAddUser,
+        handleRemoveUser,
+        handleEditUser
       }}
     >
       {children}

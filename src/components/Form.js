@@ -2,12 +2,15 @@
 import { css, jsx } from "@emotion/core";
 import { useContext } from "react";
 import { FormContext } from "./FormContext/FormContext";
+import { v4 as uuidv4 } from "uuid";
 
 const Form = () => {
-  const { formValues, updateFormValues, handleFormSubmit } = useContext(FormContext);
+  const { name, setName, address, setAddress, email, setEmail, handleAddUser } = useContext(
+    FormContext
+  );
 
   return (
-    <form css={styles} onSubmit={handleFormSubmit}>
+    <form css={styles} onSubmit={(e) => handleAddUser({name, address, email, id: uuidv4()}, e)}>
       <div className="formWrapper">
         <div className="fullWidth">
           <label>Full Name</label>
@@ -15,8 +18,8 @@ const Form = () => {
             type="text"
             placeholder="Full name"
             name="fullName"
-            value={formValues.fullName}
-            onChange={updateFormValues}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
           />
         </div>
         <div className="wrapper">
@@ -26,8 +29,8 @@ const Form = () => {
               type="text"
               placeholder="Address"
               name="address"
-              value={formValues.address}
-              onChange={updateFormValues}
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
             />
           </div>
           <div className="wrapperColumn">
@@ -36,8 +39,8 @@ const Form = () => {
               type="email"
               placeholder="Email"
               name="email"
-              value={formValues.email}
-              onChange={updateFormValues}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
         </div>
