@@ -1,6 +1,5 @@
 import React, { useState, createContext, useEffect } from "react";
 import firebase from "../../db/firebase";
-import { v4 as uuidv4 } from "uuid";
 
 export const FormContext = createContext();
 export const FormProvider = ({ children }) => {
@@ -8,9 +7,11 @@ export const FormProvider = ({ children }) => {
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [email, setEmail] = useState("");
+  const [contactId, setContactId] = useState(null);
+  const [btnText, setBtnText] = useState("Submit");
   const [formValues, setFormValues] = useState([]);
 
-
+  // Show the firestore contacts on the page.
   const handleOutputFormValues = () => {
     ref.onSnapshot((querySnapshot) => {
       const items = [];
@@ -23,17 +24,10 @@ export const FormProvider = ({ children }) => {
 
   useEffect(() => {
     handleOutputFormValues();
-  }, []);
+  }, [contactId]);
 
-  const clearInputValues = () => {
-    setName("");
-    setAddress("");
-    setEmail("");
-  };
-
-  const handleAddUser = (newUser, e) => {
-    // Prevent the page from refreshing after the submit button is clicked
-    e.preventDefault();
+  // Add a user when the user submits the form
+  const handleAddUser = (newUser) => {
     ref
       .doc(newUser.id)
       .set(newUser)
@@ -44,8 +38,16 @@ export const FormProvider = ({ children }) => {
     clearInputValues();
   };
 
-  // Delete a user
+  const handleSubmit = (newUser, e) => {
+    e.preventDefault();
+    setContactId(null);
+    !contactId ? handleAddUser(newUser) : handleUpdateUser();
+    clearInputValues();
+  };
+
+  // Delete a user from the firestore database
   const handleRemoveUser = (item) => {
+    // Gets a reference to the contact id in the firestore database and calls the delete method on that id.
     ref
       .doc(item.id)
       .delete()
@@ -54,9 +56,53 @@ export const FormProvider = ({ children }) => {
       });
   };
 
+  // Populate the form input values to the contact that the user clicked on
   const handleEditUser = (item) => {
-    console.log(item)
+    setName(item.name);
+    setEmail(item.email);
+    setAddress(item.address);
+    setContactId(item.id);
+    // Change the button text to "Update" once the user clicks on the edit button
+    setBtnText("Update")
+  };
+
+  // If the user clicks on edit and doesn't want to update the contact
+  const handleCancelUpdate = (e) => {
+    e.preventDefault();
+    setName("");
+    setEmail("");
+    setAddress("");
+    // Changed the btnText back to submit so the cancel button is hidden and the text is "Submit"
+    setBtnText("Submit")
   }
+
+  // Update a specific user in the firestore databse
+  const handleUpdateUser = () => {
+    setFormValues(
+      formValues.map((contact) =>
+        // Gets a reference to the contact id in the firestore db. If the contactId in the firestore database
+        // equals the contact id of the contact the user clicked on, update the contact object.
+        ref
+          .doc(contact.id)
+          .update(
+            contact.id === contactId
+              ? { ...contact, name: name, email: email, address: address }
+              : contact
+          )
+          .catch((error) => {
+            console.log(error);
+          })
+      )
+    );
+    setBtnText("Submit")
+  };
+
+  // Clear the input values when the user submits the form
+  const clearInputValues = () => {
+    setName("");
+    setAddress("");
+    setEmail("");
+  };
 
   return (
     <FormContext.Provider
@@ -68,9 +114,11 @@ export const FormProvider = ({ children }) => {
         email,
         setEmail,
         formValues,
-        handleAddUser,
         handleRemoveUser,
-        handleEditUser
+        handleEditUser,
+        handleSubmit,
+        btnText,
+        handleCancelUpdate
       }}
     >
       {children}

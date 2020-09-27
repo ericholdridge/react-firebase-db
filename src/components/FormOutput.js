@@ -14,9 +14,9 @@ const FormOutput = () => {
         <h3>Actions</h3>
       </div>
       <div className="formData">
-        {formValues.map((item) => {
+        {formValues.map((item, index) => {
           return (
-            <div key={item.id}>
+            <div key={index}>
               <span>{item.name}</span>
               <span>{item.email}</span>
               <span>{item.address}</span>

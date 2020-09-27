@@ -5,12 +5,23 @@ import { FormContext } from "./FormContext/FormContext";
 import { v4 as uuidv4 } from "uuid";
 
 const Form = () => {
-  const { name, setName, address, setAddress, email, setEmail, handleAddUser } = useContext(
-    FormContext
-  );
+  const {
+    name,
+    setName,
+    address,
+    setAddress,
+    email,
+    setEmail,
+    handleSubmit,
+    btnText,
+    handleCancelUpdate,
+  } = useContext(FormContext);
 
   return (
-    <form css={styles} onSubmit={(e) => handleAddUser({name, address, email, id: uuidv4()}, e)}>
+    <form
+      css={styles}
+      onSubmit={(e) => handleSubmit({ name, address, email, id: uuidv4() }, e)}
+    >
       <div className="formWrapper">
         <div className="fullWidth">
           <label>Full Name</label>
@@ -45,7 +56,15 @@ const Form = () => {
           </div>
         </div>
       </div>
-      <button type="submit">Submit</button>
+      {/* If the btnText value is "Update", render two buttons that are Update and Cancel. If the btnText is "Submit", only render the one button called "Submit" */}
+      {btnText === "Update" ? (
+        <div>
+          <button>Update</button>
+          <button onClick={(e) => handleCancelUpdate(e)}>Cancel</button>
+        </div>
+      ) : (
+        <button>Submit</button>
+      )}
     </form>
   );
 };
